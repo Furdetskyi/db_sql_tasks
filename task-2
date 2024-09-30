@@ -1,0 +1,5 @@
+SELECT  title, description, length
+FROM public.film;
+
+
+
