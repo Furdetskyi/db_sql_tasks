@@ -1,0 +1,46 @@
+SELECT  title, description, length
+FROM public.film;
+
+
+SELECT customer.first_name, customer.last_name, film.title, lower(rental.rental_period) AS rental_start_date
+FROM rental
+JOIN inventory ON rental.inventory_id = inventory.inventory_id
+JOIN film ON inventory.film_id = film.film_id
+JOIN customer ON rental.customer_id = customer.customer_id
+WHERE customer.first_name = 'PATRICIA' AND customer.last_name = 'JOHNSON';
+
+
+SELECT film.title, COUNT(rental.rental_id) AS rental_count
+FROM film
+JOIN inventory ON film.film_id = inventory.film_id
+JOIN rental ON inventory.inventory_id = rental.inventory_id
+GROUP BY film.title
+ORDER BY rental_count DESC
+LIMIT 5;
+
+
+INSERT into city (city,country_id,last_update)
+values ('San Francisco',(select country_id from country where country='United States'),NOW());
+INSERT into address (address,address2,district,city_id,postal_code,phone,last_update)
+ values ('123 Main St','','District 1',(select city_id from city where city='San Francisco'),'1234','345-232',NOW());
+INSERT into customer (store_id,first_name,last_name,email,address_id,activebool,create_date,last_update)
+ values (1,'ALICE','COOPER','email@mail',(select address_id from address where address='123 Main St' limit 1),true,NOW(),NOW())
+
+
+UPDATE address
+SET address = '456 Elm St', last_update = NOW()
+WHERE address_id = (
+    SELECT address_id 
+    FROM address 
+    WHERE address = '123 Main St' 
+      AND city_id = (SELECT city_id FROM city WHERE city = 'San Francisco') 
+      AND address_id = (
+          SELECT address_id 
+          FROM customer 
+          WHERE first_name = 'ALICE' AND last_name = 'COOPER'
+      )
+);
+
+
+DELETE FROM public.customer
+WHERE first_name = 'ALICE' AND last_name = 'COOPER';
